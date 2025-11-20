@@ -11,7 +11,15 @@ import SwiftUI
 struct rickAndMortySwiftUIApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            AppFactory.makeCharactersView()
         }
+    }
+}
+
+struct AppFactory {
+    static func makeCharactersView() -> CharactersView {
+        let service = CharactersService()
+        let repository = CharactersRepository(service: service)
+        return CharactersView(repository: repository)
     }
 }
