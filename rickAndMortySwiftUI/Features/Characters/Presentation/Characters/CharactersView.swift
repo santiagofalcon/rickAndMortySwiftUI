@@ -5,7 +5,6 @@
 //  Created by Santiago Falcon Gonzalez on 17/11/25.
 //
 
-import Foundation
 import SwiftUICore
 import SwiftUI
 
@@ -24,7 +23,6 @@ struct CharactersView: View {
         NavigationView {
             List {
                 Section {
-                    // contenido normal
                     ForEach(vm.characters) { character in
                         CharacterRowView(character: character)
                             .onTapGesture {
@@ -37,8 +35,11 @@ struct CharactersView: View {
                 } header: {
                     SearchBar(text: $searchText)
                         .padding(.bottom, 8)
+                        .onChange(of: searchText) { _, newValue in
+                                    debounceSearch(text: newValue)
+                                }
                 }
-                .headerProminence(.increased)  // 🔥 hace el header sticky
+                .headerProminence(.increased)
             }
             .listStyle(.plain)
             .sheet(item: $selectedCharacter) { character in
@@ -46,8 +47,10 @@ struct CharactersView: View {
             }
             .overlay(loadingMoreView, alignment: .bottom)
             .navigationTitle("Characters")
-            .onChange(of: searchText) {
-                debounceSearch(text: searchText)
+            .onReceive(vm.$lastError) { err in
+                if let err {
+                    toastMessage = err.localizedDescription
+                }
             }
             .toast(message: $toastMessage)
             .task {
@@ -65,12 +68,10 @@ struct CharactersView: View {
 
     // MARK: - Debounce Search
     func debounceSearch(text: String) {
-        // Cancel previous task
         searchDebounceTask?.cancel()
 
-        // Start new debounce
         searchDebounceTask = Task {
-            try? await Task.sleep(nanoseconds: 400_000_000) // 0.4s delay
+            try? await Task.sleep(nanoseconds: 400_000_000) 
             await vm.loadCharacters(query: text)
         }
     }

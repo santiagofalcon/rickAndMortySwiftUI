@@ -30,13 +30,11 @@ final class ImageLoader: ObservableObject {
         self.url = url
 
         Task {
-            // 1) Check in-memory cache
             if let cached = await ImageCache.shared.image(for: url) {
                 self.image = cached
                 return
             }
 
-            // 2) Try disk/network
             do {
                 let (data, _) = try await URLSession.shared.data(from: url)
                 if let uiImage = UIImage(data: data) {
@@ -45,7 +43,7 @@ final class ImageLoader: ObservableObject {
                     await ImageCache.shared.insert(img, for: url)
                 }
             } catch {
-                print("❌ Image load error: \(error)")
+                print("Image load error: \(error)")
             }
         }
     }

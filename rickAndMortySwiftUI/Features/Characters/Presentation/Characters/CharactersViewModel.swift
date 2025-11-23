@@ -39,6 +39,12 @@ final class CharactersViewModel: ObservableObject {
             characters = response.results
             totalPages = response.info.pages
         } catch {
+            let ns = error as NSError
+
+            if ns.code == NSURLErrorCancelled {
+                return
+            }
+
             if let netErr = error as? NetworkError {
                 lastError = netErr
             } else {
@@ -54,7 +60,6 @@ final class CharactersViewModel: ObservableObject {
         guard !isLoadingMore else { return }
         guard currentPage < totalPages else { return }
         
-        // Si estamos en la penúltima celda → cargar más
         if let index = characters.firstIndex(where: { $0.id == item.id }),
            index >= characters.count - 2 {
 
@@ -70,14 +75,19 @@ final class CharactersViewModel: ObservableObject {
             let response = try await repository.getCharacters(page: currentPage, query: currentQuery)
             characters.append(contentsOf: response.results)
         } catch {
+            let ns = error as NSError
+
+            if ns.code == NSURLErrorCancelled {
+                return
+            }
+
             if let netErr = error as? NetworkError {
                 lastError = netErr
             } else {
                 lastError = .unknown
             }
         }
-
-
+        
         isLoadingMore = false
     }
 }

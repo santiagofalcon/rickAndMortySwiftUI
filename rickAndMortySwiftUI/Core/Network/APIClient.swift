@@ -13,12 +13,17 @@ protocol APIClientProtocol {
 
 final class APIClient: APIClientProtocol {
 
+    private let session: URLSession
+
+    init(session: URLSession = .shared) {
+        self.session = session
+    }
+
     func fetch<T>(_ type: T.Type, from url: URL) async throws -> T where T : Decodable {
 
         do {
-            let (data, response) = try await URLSession.shared.data(from: url)
+            let (data, response) = try await session.data(from: url)
 
-            // Validar respuesta
             guard let http = response as? HTTPURLResponse else {
                 throw NetworkError.invalidStatusCode
             }
@@ -27,7 +32,6 @@ final class APIClient: APIClientProtocol {
                 throw NetworkError.serverError(code: http.statusCode)
             }
 
-            // Decodificar
             do {
                 return try JSONDecoder().decode(T.self, from: data)
             } catch {
@@ -35,7 +39,6 @@ final class APIClient: APIClientProtocol {
             }
 
         } catch {
-            // Detectar falta de internet
             if (error as NSError).code == NSURLErrorNotConnectedToInternet {
                 throw NetworkError.noInternet
             }
