@@ -26,7 +26,7 @@ struct CharacterRowView: View {
 
                 Text(character.status.rawValue)
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
         }
     }

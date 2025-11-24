@@ -48,7 +48,7 @@ struct InfoRow: View {
                 .font(.headline)
             Spacer()
             Text(value)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
         }
     }
 }
